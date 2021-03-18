@@ -1,0 +1,23 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+djangorestframework = "*"
+mysqlclient = "*"
+mysql = "*"
+mysql-connector-python = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.7"
+
+[scripts]
+makemigrations = "python manage.py makemigrations --settings=monet_api.settings.local"
+migrate = "python manage.py migrate --settings=monet_api.settings.local"
+server = "python manage.py runserver --settings=monet_api.settings.local 0.0.0.0:8000"
+createsuperuser = "python manage.py createsuperuser --settings=monet_api.settings.local"
+file_process = "python manage.py file_process --settings=monet_api.settings.local"
