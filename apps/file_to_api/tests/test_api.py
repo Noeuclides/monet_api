@@ -7,9 +7,10 @@ from rest_framework import status
 
 
 class TestAPI(TestCase):
-
-    def setUp(self):
-        print("API TEST")
+    
+    @classmethod
+    def setUpClass(cls):
+        super(TestAPI, cls).setUpClass()
         base_path = os.path.abspath('apps/file_to_api/tests/test_files')
         filepath = os.path.join(base_path, "test_file.txt")
         call_command('file_process', filepath)
