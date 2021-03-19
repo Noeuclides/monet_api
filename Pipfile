@@ -9,6 +9,8 @@ djangorestframework = "*"
 mysqlclient = "*"
 mysql = "*"
 mysql-connector-python = "*"
+pycodestyle = "*"
+autopep8 = "*"
 
 [dev-packages]
 

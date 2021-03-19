@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import fields
 
 
 class FileControlRecord(models.Model):
@@ -26,6 +27,16 @@ class FileControlRecord(models.Model):
 
         verbose_name = 'Registro de control de archivo'
         verbose_name_plural = 'Registros de control de archivo'
+
+
+    def save(self, *args, **kwargs):
+        model_fields = self._meta.get_fields()
+        for field in model_fields:
+            # Clean Charfields removing tabs or spaces
+            if type(field) == fields.CharField:
+                value = self.__getattribute__(field.name)
+                self.__setattr__(field.name, value.strip())
+        super().save(*args, **kwargs)
 
     def __str__(self):
         """Unicode representation of FileControlRecord."""
@@ -72,6 +83,14 @@ class RegisterDetail(models.Model):
 
         verbose_name = 'Detalle de registros de cobros'
         verbose_name_plural = 'Detalle de registros de cobros'
+
+    def save(self, *args, **kwargs):
+        model_fields = self._meta.get_fields()
+        for field in model_fields:
+            if type(field) == fields.CharField:
+                value = self.__getattribute__(field.name)
+                self.__setattr__(field.name, value.strip())
+        super().save(*args, **kwargs)
 
     def __str__(self):
         """Unicode representation of RegisterDetail."""

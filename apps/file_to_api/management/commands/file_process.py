@@ -1,34 +1,23 @@
-from django.core.management.base import BaseCommand
+from typing import Any
+from django.core.management.base import BaseCommand, CommandParser
 from .process_line import ProcessFileLine
 from apps.file_to_api.models import FileControlRecord, RegisterDetail
+from .model_lists import (
+    MODEL_FIELDS, FIELD_LENGTH, DETAIL_REGISTER_MODEL, DEATIL_FIELD_LENGTH
+)
 
-MODEL_FIELDS = [
-    'NIT', 'entity_name', 'agreement_code', 'transmission_date',
-    'tracking_number', 'expiration_date', 'register_number', 'total_transaction_value'
-]
-
-FIELD_LENGTH = [1, 13, 20, 15, 8, 1, 8, 8, 17, 79]
-
-DETAIL_REGISTER_MODEL = [
-    'client_id', 'client_name', 'bank_account', 'bank_account_number',
-    'transaction_type', 'transaction_value', 'validation_indicator', 'reference1',
-    'reference2', 'expiration_date', 'billed_period', 'cycle'
-]
-DEATIL_FIELD_LENGTH = [
-    1, 13, 20, 9, 17, 2, 17, 1, 30, 30, 8, 2, 3, 17
-]
 
 class Command(BaseCommand):
     help = 'Process file and fill the database'
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument('file_path', type=str, help='file path to process')
 
     def handle(self, *args, **kwargs):
         file_path = kwargs['file_path']
         self.read_file(file_path)
-    
-    def read_file(self, filepath):
+
+    def read_file(self, filepath: str) -> None:
         with open(filepath) as fp:
             line = fp.readline()
             count = 1
@@ -36,32 +25,52 @@ class Command(BaseCommand):
                 line = line.replace('\n', '')
                 if count == 1:
                     if line[0] != '1':
-                        raise ValueError("El primer caracter de la línea de control debe ser 1")
+                        raise ValueError(
+                            "El primer caracter de la línea de control debe ser 1")
                     if line[-79:].strip():
-                        raise ValueError("Los últimos 79 caracteres de línea de control son de reserva")
-                    line_obj = ProcessFileLine(MODEL_FIELDS, FIELD_LENGTH, line)
-                    print(line_obj.model_dict)
-                    line_obj.get_date('expiration_date')
-                    line_obj.get_date('transmission_date')
-                    print(line_obj.model_dict)
-                    line_obj.str_to_int('register_number')
-                    line_obj.str_to_float('total_transaction_value')
-                    print(line_obj.model_dict)
-                    model_instance = FileControlRecord(**line_obj.model_dict)
-                    model_instance.save()
-                    
+                        raise ValueError(
+                            "Los últimos 79 caracteres de línea de control son de reserva")
+                    self.save_model_instance(
+                        FileControlRecord, MODEL_FIELDS, FIELD_LENGTH, line)
                 else:
                     if line[0] != '6':
-                        raise ValueError("El primer caracter de la línea de control debe ser 6")
+                        raise ValueError(
+                            "El primer caracter de la línea de control debe ser 6")
                     if line[-17:].strip():
-                        raise ValueError("Los últimos 17 caracteres de línea de control son de reserva")
-                    line_obj = ProcessFileLine(DETAIL_REGISTER_MODEL, DEATIL_FIELD_LENGTH, line)
-                    print(line_obj.model_dict)
-                    line_obj.get_date('expiration_date')
-                    line_obj.str_to_float('transaction_value')
-                    print(line_obj.model_dict)
-                    model_instance = RegisterDetail(**line_obj.model_dict)
-                    model_instance.save()
+                        raise ValueError(
+                            "Los últimos 17 caracteres de línea de control son de reserva")
+                    self.save_model_instance(
+                        RegisterDetail, DETAIL_REGISTER_MODEL,
+                        DEATIL_FIELD_LENGTH, line)
                 line = fp.readline()
                 count += 1
-        
+
+    def clean_field(
+            self,
+            obj_instance: ProcessFileLine,
+            key_list: list,
+            type_to_clean: str) -> None:
+        for key in key_list:
+            if type_to_clean == 'date':
+                obj_instance.get_date(key)
+            if type_to_clean == 'int':
+                obj_instance.str_to_int(key)
+            if type_to_clean == 'float':
+                obj_instance.str_to_float(key)
+
+    def save_model_instance(
+            self,
+            model: Any,
+            model_list: list,
+            field_length: list,
+            line: str) -> None:
+        line_obj = ProcessFileLine(model_list, field_length, line)
+        self.clean_field(
+            line_obj, ['expiration_date', 'transmission_date'], 'date')
+        self.clean_field(line_obj, ['register_number'], 'int')
+        self.clean_field(
+            line_obj, [
+                'total_transaction_value', 'transaction_value'], 'float')
+
+        model_instance = model(**line_obj.model_dict)
+        model_instance.save()
