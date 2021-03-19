@@ -1,7 +1,6 @@
 # Monet API
 
-This repository has a django command that fills the database to look that info at the 
-api endpoints.
+API created from plain text files through a django command.
 
 ## Requirements
 Python3.7 or greater.
@@ -32,7 +31,7 @@ pipenv run python configDB.py
 
 ## Usage
 
-Run the migrate command to have the db structure on your db:
+Run the migrate command to have the db structure on your local db:
 
 ```bash
 pipenv run migrate
@@ -50,6 +49,6 @@ pipenv run server
 ```
 
 
-Note: The migrate and server commands are set in the Pipfile.
+Note: The migrate, server and file_process commands are configured in the Pipfile.
 
 
