@@ -24,7 +24,7 @@ class FileControlRecord(models.Model):
 
     class Meta:
         """Meta definition for FileControlRecord."""
-
+        unique_together = ('NIT', 'transmission_date', 'tracking_number')
         verbose_name = 'Registro de control de archivo'
         verbose_name_plural = 'Registros de control de archivo'
 
