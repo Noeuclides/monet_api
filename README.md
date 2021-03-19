@@ -31,17 +31,25 @@ pipenv run python configDB.py
 ```
 
 ## Usage
+
+Run the migrate command to have the db structure on your db:
+
+```bash
+pipenv run migrate
+```
+
 Run the following command with the plain file to process:
 ```bash
 pipenv run file_process FILE_PATH
 ```
 
-And then run the django server:
-
+And then you can run the server and go to te api/control  and api/detalle endpoints
+to check if the file info is in the API.
 ```bash
-pipenv run migrate
 pipenv run server
 ```
+
+
 Note: The migrate and server commands are set in the Pipfile.
 
-Go to te api/control  and api/detalle endpoints.
+
