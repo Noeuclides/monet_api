@@ -6,6 +6,10 @@ from .model_lists import (
     MODEL_FIELDS, FIELD_LENGTH, DETAIL_REGISTER_MODEL, DEATIL_FIELD_LENGTH
 )
 
+LINE_LENGTH = 170
+CONTROL_REGISTER_TYPE =  1
+DETAIL_REGISTER_TYPE = 6
+
 
 class Command(BaseCommand):
     help = 'Process file and fill the database'
@@ -23,8 +27,10 @@ class Command(BaseCommand):
             count = 1
             while line:
                 line = line.replace('\n', '')
+                if len(line) != LINE_LENGTH:
+                    raise ValueError("Línea no válida")
                 if count == 1:
-                    if line[0] != '1':
+                    if int(line[0]) != CONTROL_REGISTER_TYPE:
                         raise ValueError(
                             "El primer caracter de la línea de control debe ser 1")
                     if line[-79:].strip():
@@ -33,7 +39,7 @@ class Command(BaseCommand):
                     self.save_model_instance(
                         FileControlRecord, MODEL_FIELDS, FIELD_LENGTH, line)
                 else:
-                    if line[0] != '6':
+                    if int(line[0]) != DETAIL_REGISTER_TYPE:
                         raise ValueError(
                             "El primer caracter de la línea de control debe ser 6")
                     if line[-17:].strip():
